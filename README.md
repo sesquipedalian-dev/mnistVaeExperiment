@@ -1,5 +1,5 @@
 # MNIST Variable Autoencoder Experiment
-Create a variable autoencoder using the very simple MNIST handwritten digits dataset.  
+Create a variational autoencoder using the very simple MNIST handwritten digits dataset.  
 
 ## Resources
 * keras examples: [https://blog.keras.io/building-autoencoders-in-keras.html]
