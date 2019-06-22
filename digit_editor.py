@@ -5,10 +5,12 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pygame
 from pygame.locals import *
+from slider import Slider 
 
 # constants
 DENSE_SIZE = 50 
 BLACK = (0, 0, 0)
+VISIBLE_COMPONENTS = 10
 
 def init_device():
     """
@@ -25,6 +27,8 @@ def deviations_to_decoded(deviations, batch_size=1):
     Take an array of deviations from the mean for each of the variables, 
     and run it through the model to produce a decoded image. 
     """
+    print("calculating new image {}", deviations)
+
     # interpret deviations into a tensor
     if isinstance(deviations, np.ndarray): 
         actual_deviations = torch.from_numpy(deviations).type(torch.FloatTensor).to(device)
@@ -60,7 +64,7 @@ def deviations_to_decoded(deviations, batch_size=1):
 def draw_current_digit(image):
     image_surface = pygame.surfarray.make_surface(image)
     bigger = pygame.transform.scale(image_surface, (50, 50))
-    screen.blit(bigger, (0, 0))
+    screen.blit(bigger, (350, 100))
 
 class EventsState(object): 
     def __init__(self): 
@@ -94,6 +98,7 @@ def handle_events(state):
         elif event.type == QUIT:
             state.running = False
 
+
 device = init_device()
 
 # create model and load trained weights 
@@ -126,21 +131,32 @@ current_image = deviations_to_decoded(settings)
 
 # start pygame
 pygame.init()
-screen = pygame.display.set_mode((100, 100))
+screen = pygame.display.set_mode((800, 600))
 
-# main loop
+# initialize shared, editable state
 state = EventsState()
 state.running = True
 state.shouldCalculateImage = False
+
+# init variable sliders 
+slides = []
+for i in range(VISIBLE_COMPONENTS):
+    slides.append(Slider(i, 3, -3, (i % 2) * 150, (i // 2) * 48 + 60, 150, 48, 
+        settings, state))
+
+# main loop
 while state.running:
     # get input
     handle_events(state)
 
     if state.shouldCalculateImage: 
         current_image = deviations_to_decoded(settings)
+        state.shouldCalculateImage = False
 
     # draw stuff
     screen.fill(BLACK)
+    for s in slides:
+        s.draw(settings, screen)
     draw_current_digit(current_image)
 
     # copy over new screen buffer
