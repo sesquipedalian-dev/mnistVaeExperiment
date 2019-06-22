@@ -25,6 +25,7 @@ def deviations_to_decoded(deviations, batch_size=1):
     Take an array of deviations from the mean for each of the variables, 
     and run it through the model to produce a decoded image. 
     """
+    # interpret deviations into a tensor
     if isinstance(deviations, np.ndarray): 
         actual_deviations = torch.from_numpy(deviations).type(torch.FloatTensor).to(device)
     elif isinstance(deviations, torch.Tensor):
@@ -32,9 +33,15 @@ def deviations_to_decoded(deviations, batch_size=1):
     elif isinstance(deviations, int):
         actual_deviations = torch.FloatTensor([deviations]).repeat(DENSE_SIZE).to(device)
 
+    # convert to appropriate order
+    actual_actual_deviations = np.zeros(DENSE_SIZE)
+    for i in range(DENSE_SIZE): 
+        actual_actual_deviations[std_dev_by_abs[i]] = actual_deviations[i]
+    actual_actual_deviations = torch.from_numpy(actual_actual_deviations).type(torch.FloatTensor).to(device)
+
     # predict
     decoded = model.sample(mus.repeat(batch_size, 1), 
-                           std_devs.repeat(batch_size, 1), deviation=actual_deviations)
+                           std_devs.repeat(batch_size, 1), deviation=actual_actual_deviations)
 
     # resize
     decoded = decoded.data.numpy().reshape((28, 28))
@@ -105,8 +112,17 @@ std_dev_path = "model/std_devs.pt"
 mus = torch.load(mus_path).type(torch.FloatTensor)
 std_devs = torch.load(std_dev_path).type(torch.FloatTensor)
 
-# create a sample from our means and 
-an_image = deviations_to_decoded(42)
+# sort the indices by the amount of impact they have on the resulting digit 
+# (how wide the std dev).  
+# we'll ues this to convert the current_settings array to the 
+# desired dense array for decoding 
+std_dev_by_abs = [(i, abs(std_devs[i])) for i in list(range(DENSE_SIZE))]
+std_dev_by_abs = sorted(std_dev_by_abs, key=lambda p: p[1], reverse=True)
+std_dev_by_abs = [p[0] for p in std_dev_by_abs]
+
+# create the mean digit as our starting image
+settings = np.zeros(DENSE_SIZE)
+current_image = deviations_to_decoded(settings)
 
 # start pygame
 pygame.init()
@@ -115,13 +131,17 @@ screen = pygame.display.set_mode((100, 100))
 # main loop
 state = EventsState()
 state.running = True
+state.shouldCalculateImage = False
 while state.running:
     # get input
     handle_events(state)
 
+    if state.shouldCalculateImage: 
+        current_image = deviations_to_decoded(settings)
+
     # draw stuff
     screen.fill(BLACK)
-    draw_current_digit(an_image)
+    draw_current_digit(current_image)
 
     # copy over new screen buffer
     pygame.display.flip()
