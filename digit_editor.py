@@ -3,8 +3,12 @@ import torchvision
 import torchvision.transforms as transforms
 from matplotlib import pyplot as plt
 import numpy as np
+import pygame
+from pygame.locals import *
 
+# constants
 DENSE_SIZE = 50 
+BLACK = (0, 0, 0)
 
 def init_device():
     """
@@ -28,10 +32,60 @@ def deviations_to_decoded(deviations, batch_size=1):
     elif isinstance(deviations, int):
         actual_deviations = torch.FloatTensor([deviations]).repeat(DENSE_SIZE).to(device)
 
+    # predict
     decoded = model.sample(mus.repeat(batch_size, 1), 
                            std_devs.repeat(batch_size, 1), deviation=actual_deviations)
+
+    # resize
     decoded = decoded.data.numpy().reshape((28, 28))
+
+    # normalize 
+    decoded = (decoded / 2 + .5) * 255
+    
+    # create RGB
+    decoded = np.stack([decoded, decoded, decoded], 0)
+
+    # flip 
+    decoded = np.transpose(decoded, (2, 1, 0))
+
     return decoded
+
+def draw_current_digit(image):
+    image_surface = pygame.surfarray.make_surface(image)
+    bigger = pygame.transform.scale(image_surface, (50, 50))
+    screen.blit(bigger, (0, 0))
+
+class EventsState(object): 
+    def __init__(self): 
+        self.d = {}
+
+    def __getattribute__(self, name):
+        if name != 'd': 
+            return self.d.get(name, False)
+        else: 
+            return super().__getattribute__(name)
+
+    def __setattr__(self, name, value):
+        if name != 'd': 
+            self.d[name] = value
+        else: 
+            return super().__setattr__(name, value)
+
+def handle_events(state): 
+    for event in pygame.event.get():
+        if event.type == KEYDOWN:
+            print('keydown {}'.format(event.key))
+            # If the Esc key has been pressed set running to false to exit the main loop
+            if event.key == K_LSHIFT or event.key == K_RSHIFT:
+                state.isShiftPressed = True
+            elif event.key == K_ESCAPE:
+                state.running = False
+        # Check for QUIT event; if QUIT, set running to false
+        elif event.type == KEYUP:
+            if event.key == K_LSHIFT or event.key == K_RSHIFT:
+                state.isShiftPressed = False
+        elif event.type == QUIT:
+            state.running = False
 
 device = init_device()
 
@@ -53,3 +107,21 @@ std_devs = torch.load(std_dev_path).type(torch.FloatTensor)
 
 # create a sample from our means and 
 an_image = deviations_to_decoded(42)
+
+# start pygame
+pygame.init()
+screen = pygame.display.set_mode((100, 100))
+
+# main loop
+state = EventsState()
+state.running = True
+while state.running:
+    # get input
+    handle_events(state)
+
+    # draw stuff
+    screen.fill(BLACK)
+    draw_current_digit(an_image)
+
+    # copy over new screen buffer
+    pygame.display.flip()

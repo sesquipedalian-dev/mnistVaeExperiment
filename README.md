@@ -9,3 +9,4 @@ Create a variational autoencoder using the very simple MNIST handwritten digits 
 * Get conda
 * `conda install -c fastai fastai`
 * `conda install pytorch-cpu torchvision-cpu -c pytorch`
+* https://pygame-zero.readthedocs.io/en/1.0.2/installation.html?highlight=python
