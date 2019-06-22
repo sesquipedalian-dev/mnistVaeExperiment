@@ -3,8 +3,8 @@ Create a variational autoencoder using the very simple MNIST handwritten digits 
 
 ## Resources
 * initial inspiration: https://github.com/carykh/alignedCelebFaces
-* keras examples: [https://blog.keras.io/building-autoencoders-in-keras.html]
-* very conceptual: [https://towardsdatascience.com/intuitively-understanding-variational-autoencoders-1bfe67eb5daf]
+* keras examples: https://blog.keras.io/building-autoencoders-in-keras.html
+* very conceptual: https://towardsdatascience.com/intuitively-understanding-variational-autoencoders-1bfe67eb5daf
 
 ## Dependencies
 * Get conda
