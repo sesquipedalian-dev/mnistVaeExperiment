@@ -99,7 +99,7 @@ def handle_events(state):
             state.running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_loc = pygame.mouse.get_pos()
-            if not (event.button == 4 or event.button == 5):
+            if  event.button == 4 or event.button == 5  :
                 pass
             else: 
                 enteringName = False
@@ -107,6 +107,9 @@ def handle_events(state):
                     if mouse_loc[1] >= 60 and mouse_loc[1] < (540 / 2):
                         i = (mouse_loc[0] // 150) + ((mouse_loc[1] - 60) // 48) * 2
                         slides[i].hit = True
+        elif event.type == pygame.MOUSEBUTTONUP:
+            for s in slides:
+                s.hit = False
 
 device = init_device()
 
@@ -150,8 +153,7 @@ state.shouldCalculateImage = False
 # init variable sliders 
 slides = []
 for i in range(VISIBLE_COMPONENTS):
-    slides.append(Slider(i, 3, -3, (i % 2) * 150, (i // 2) * 48 + 60, 150, 48, 
-        settings, state))
+    slides.append(Slider(i, 3, -3, (i % 2) * 150, (i // 2) * 48 + 60, 150, 48))
 
 # main loop
 while state.running:

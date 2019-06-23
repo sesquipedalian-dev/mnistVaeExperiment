@@ -53,10 +53,10 @@ class Slider():
         screen.blit(surf, (self.x, self.y))
 
     def move(self, settings, state):
-        settings[i] = (pygame.mouse.get_pos()[0] - self.x - 10) / 130 * (self.maxi - self.mini) + self.mini
-        if settings[i] < self.mini:
-            settings[i] = self.mini
-        if settings[i] > self.maxi:
-            settings[i] = self.maxi
+        settings[self.i] = (pygame.mouse.get_pos()[0] - self.x - 10) / 130 * (self.maxi - self.mini) + self.mini
+        if settings[self.i] < self.mini:
+            settings[self.i] = self.mini
+        if settings[self.i] > self.maxi:
+            settings[self.i] = self.maxi
         state.shouldCalculateImage = True
 
