@@ -97,7 +97,16 @@ def handle_events(state):
                 state.isShiftPressed = False
         elif event.type == QUIT:
             state.running = False
-
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_loc = pygame.mouse.get_pos()
+            if not (event.button == 4 or event.button == 5):
+                pass
+            else: 
+                enteringName = False
+                if mouse_loc[0] < 300:
+                    if mouse_loc[1] >= 60 and mouse_loc[1] < (540 / 2):
+                        i = (mouse_loc[0] // 150) + ((mouse_loc[1] - 60) // 48) * 2
+                        slides[i].hit = True
 
 device = init_device()
 
@@ -152,6 +161,10 @@ while state.running:
     if state.shouldCalculateImage: 
         current_image = deviations_to_decoded(settings)
         state.shouldCalculateImage = False
+
+    for s in slides:
+        if s.hit:
+            s.move(settings, state)
 
     # draw stuff
     screen.fill(BLACK)

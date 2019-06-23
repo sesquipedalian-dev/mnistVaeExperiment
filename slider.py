@@ -6,7 +6,7 @@ TRANS = (1, 1, 1)
 
 
 class Slider():
-    def __init__(self, i, maxi, mini, x, y, w, h, settings, state):
+    def __init__(self, i, maxi, mini, x, y, w, h):
         self.maxi = maxi
         self.mini = mini
         self.x = x
@@ -17,8 +17,6 @@ class Slider():
         self.hit = False
         self.i = i
         self.font = pygame.font.SysFont("Helvetica", 16)
-        self.settings = settings
-        self.state = state
 
     def true_i(self):
         return self.i
@@ -54,7 +52,7 @@ class Slider():
 
         screen.blit(surf, (self.x, self.y))
 
-    def move(self):
+    def move(self, settings, state):
         settings[i] = (pygame.mouse.get_pos()[0] - self.x - 10) / 130 * (self.maxi - self.mini) + self.mini
         if settings[i] < self.mini:
             settings[i] = self.mini
